@@ -30,6 +30,7 @@ services:
       - 80:80
     volumes:
       - ./Caddyfile:/etc/caddy/Caddyfile
+      - ./certs:/etc/certs
     volumes_from:
       - app
     depends_on:
