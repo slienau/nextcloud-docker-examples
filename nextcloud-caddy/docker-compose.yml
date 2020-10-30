@@ -1,11 +1,15 @@
-version: '3'
+version: '3.7'
 
 services:
   db:
     image: postgres:alpine
     restart: unless-stopped
     volumes:
-      - ./db-data:/var/lib/postgresql/data
+      - type: volume
+        source: db
+        target: /var/lib/postgresql/data
+        volume:
+          nocopy: true
     env_file:
       - db.env
 
@@ -13,10 +17,11 @@ services:
     image: nextcloud:fpm-alpine
     restart: unless-stopped
     volumes:
-      - ./app-data/html:/var/www/html
-      - ./app-data/apps:/var/www/html/custom_apps
-      - ./app-data/config:/var/www/html/config
-      - ./app-data/data:/var/www/html/data
+      - type: volume
+        source: nextcloud
+        target: /var/www/html
+        volume:
+          nocopy: true
     environment:
       - POSTGRES_HOST=db
       - NEXTCLOUD_TRUSTED_DOMAINS=raspi.lan,raspi.lan:443,raspi-lan:80
@@ -39,6 +44,14 @@ services:
     depends_on:
       - app
 
-#volumes:
-#  db:
-#  nextcloud:
+volumes:
+  db:
+    driver_opts:
+      type: "nfs"
+      o: "addr=192.168.7.10,nolock,soft,rw"
+      device: ":/volume1/raspidata/nextcloud-db"
+  nextcloud:
+    driver_opts:
+      type: "nfs"
+      o: "addr=192.168.7.10,nolock,soft,rw"
+      device: ":/volume1/raspidata/nextcloud-data"
